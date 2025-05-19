@@ -1,5 +1,9 @@
 package main.java.restaurant.test;
 
-public class Main {
+import main.java.restaurant.ui.RestaurantUI;
 
+public class Main {
+    public static void main(String[] args) {
+        new RestaurantUI();
+    }
 }

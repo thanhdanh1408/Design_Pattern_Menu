@@ -1,5 +1,8 @@
 package main.java.restaurant.factory;
 
-public class AbstractFactory {
+import main.java.restaurant.model.Dish;
 
+public interface AbstractFactory {
+    Dish createAsianDish();
+    Dish createEuropeanDish();
 }

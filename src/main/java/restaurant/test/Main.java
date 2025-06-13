@@ -25,6 +25,7 @@ public class Main {
     private Order currentOrder;
     private List<Promotion> promotions;
     private List<Ingredient> ingredients;
+    private List<Supplier> suppliers;
 
     public Main() {
         orderManager = OrderManager.getInstance();
@@ -33,13 +34,45 @@ public class Main {
         currentOrder = new Order();
         promotions = new ArrayList<>();
         ingredients = new ArrayList<>();
+        suppliers = new ArrayList<>();
 
-        // Khởi tạo thực đơn, khuyến mãi và nguyên liệu
+        // Khởi tạo thực đơn, khuyến mãi, nguyên liệu và nhà cung cấp
         initializeMenu();
         initializePromotions();
         initializeIngredients();
+        initializeSuppliers();
 
         runConsoleApp();
+    }
+
+    // Lớp Supplier (giả định)
+    static class Supplier {
+        private String name;
+        private List<Ingredient> suppliedIngredients;
+
+        public Supplier(String name) {
+            this.name = name;
+            this.suppliedIngredients = new ArrayList<>();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void addIngredient(Ingredient ingredient) {
+            if (!suppliedIngredients.contains(ingredient)) {
+                suppliedIngredients.add(ingredient);
+            }
+        }
+
+        public List<Ingredient> getSuppliedIngredients() {
+            return suppliedIngredients;
+        }
+
+        @Override
+        public String toString() {
+            return name + " (Nguyên liệu: " + suppliedIngredients.size() + " loại)";
+        }
     }
 
     private void initializeMenu() {
@@ -77,17 +110,28 @@ public class Main {
         ingredients.add(new Ingredient("Đường"));
     }
 
+    private void initializeSuppliers() {
+        Supplier supplier1 = new Supplier("Công ty A");
+        supplier1.addIngredient(ingredients.get(0)); // Mì
+        supplier1.addIngredient(ingredients.get(1)); // Thịt bò
+        Supplier supplier2 = new Supplier("Công ty B");
+        supplier2.addIngredient(ingredients.get(2)); // Mì Ý
+        supplier2.addIngredient(ingredients.get(3)); // Sốt cà chua
+        suppliers.add(supplier1);
+        suppliers.add(supplier2);
+    }
+
     private void runConsoleApp() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             displayMenu();
-            System.out.print("Chọn chức năng (1-5, 0 để thoát): ");
+            System.out.print("Chọn chức năng (1-12, 0 để thoát): ");
             int choice;
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Xóa ký tự newline
-                if (choice < 0 || choice > 5) {
-                    System.out.println("Lựa chọn không hợp lệ! Vui lòng nhập số từ 0 đến 5.");
+                if (choice < 0 || choice > 12) {
+                    System.out.println("Lựa chọn không hợp lệ! Vui lòng nhập số từ 0 đến 12.");
                     continue;
                 }
             } else {
@@ -104,13 +148,34 @@ public class Main {
                     addNewDish(scanner);
                     break;
                 case 3:
-                    addPromotion(scanner);
+                    editDish(scanner);
                     break;
                 case 4:
-                    processPayment(scanner);
+                    deleteDish(scanner);
                     break;
                 case 5:
+                    addPromotion(scanner);
+                    break;
+                case 6:
                     displayOrder();
+                    break;
+                case 7:
+                    cancelOrder(scanner);
+                    break;
+                case 8:
+                    processPayment(scanner);
+                    break;
+                case 9:
+                    addNewIngredient(scanner);
+                    break;
+                case 10:
+                    addNewSupplier(scanner);
+                    break;
+                case 11:
+                    editSupplier(scanner);
+                    break;
+                case 12:
+                    deleteSupplier(scanner);
                     break;
                 case 0:
                     System.out.println("Thoát chương trình.");
@@ -126,9 +191,16 @@ public class Main {
         System.out.println("\n=== HỆ THỐNG QUẢN LÝ NHÀ HÀNG ===");
         System.out.println("1. Thêm món vào đơn hàng");
         System.out.println("2. Thêm món mới");
-        System.out.println("3. Thêm khuyến mãi");
-        System.out.println("4. Thanh toán");
-        System.out.println("5. Xem đơn hàng");
+        System.out.println("3. Sửa món");
+        System.out.println("4. Xóa món");
+        System.out.println("5. Thêm khuyến mãi");
+        System.out.println("6. Xem đơn hàng");
+        System.out.println("7. Hủy đơn hàng");
+        System.out.println("8. Thanh toán");
+        System.out.println("9. Thêm nguyên liệu mới");
+        System.out.println("10. Thêm nhà cung cấp");
+        System.out.println("11. Sửa nhà cung cấp");
+        System.out.println("12. Xóa nhà cung cấp");
         System.out.println("0. Thoát");
     }
 
@@ -138,8 +210,7 @@ public class Main {
             System.out.println((i + 1) + ". " + menu.get(i).toString());
         }
         System.out.print("Chọn số món để thêm vào đơn (hoặc 0 để quay lại): ");
-        int dishChoice = scanner.nextInt();
-        scanner.nextLine(); // Xóa ký tự newline
+        int dishChoice = getValidIntInput(scanner, 0, menu.size());
 
         if (dishChoice > 0 && dishChoice <= menu.size()) {
             Dish selectedDish = menu.get(dishChoice - 1);
@@ -155,23 +226,20 @@ public class Main {
         System.out.print("Nhập tên món: ");
         String newName = scanner.nextLine();
         System.out.print("Nhập giá: ");
-        double newPrice = scanner.nextDouble();
-        scanner.nextLine(); // Xóa ký tự newline
+        double newPrice = getValidDoubleInput(scanner);
         System.out.print("Nhập mô tả: ");
         String newDescription = scanner.nextLine();
         System.out.println("Chọn loại:");
         System.out.println("1. Món chính");
         System.out.println("2. Món tráng miệng");
         System.out.print("Chọn số: ");
-        int typeChoice = scanner.nextInt();
-        scanner.nextLine(); // Xóa ký tự newline
+        int typeChoice = getValidIntInput(scanner, 1, 2);
         System.out.println("Chọn nguyên liệu:");
         for (int i = 0; i < ingredients.size(); i++) {
             System.out.println((i + 1) + ". " + ingredients.get(i).toString());
         }
         System.out.print("Chọn số nguyên liệu (hoặc 0 nếu không chọn): ");
-        int ingredientChoice = scanner.nextInt();
-        scanner.nextLine(); // Xóa ký tự newline
+        int ingredientChoice = getValidIntInput(scanner, 0, ingredients.size());
 
         DishFactory factory;
         if (typeChoice == 1) {
@@ -217,8 +285,7 @@ public class Main {
             System.out.println((i + 1) + ". " + promotions.get(i).toString());
         }
         System.out.print("Chọn số khuyến mãi (hoặc 0 nếu không áp dụng): ");
-        int promoChoice = scanner.nextInt();
-        scanner.nextLine(); // Xóa ký tự newline
+        int promoChoice = getValidIntInput(scanner, 0, promotions.size());
 
         if (promoChoice > 0 && promoChoice <= promotions.size()) {
             invoice.applyPromotion(promotions.get(promoChoice - 1));
@@ -229,17 +296,15 @@ public class Main {
         System.out.println("2. Ví điện tử");
         System.out.println("3. Tiền mặt");
         System.out.print("Chọn số: ");
-        int paymentChoice = scanner.nextInt();
-        scanner.nextLine(); // Xóa ký tự newline
+        int paymentChoice = getValidIntInput(scanner, 1, 3);
 
         PaymentContext paymentContext = new PaymentContext();
         if (paymentChoice == 1) {
             paymentContext.setPaymentStrategy(new CreditCardPayment());
         } else if (paymentChoice == 2) {
             paymentContext.setPaymentStrategy(new EWalletPayment());
-        }
-          else if (paymentChoice == 3) {
-                paymentContext.setPaymentStrategy(new CashPayment());
+        } else if (paymentChoice == 3) {
+            paymentContext.setPaymentStrategy(new CashPayment());
         } else {
             System.out.println("Phương thức thanh toán không hợp lệ!");
             return;
@@ -258,7 +323,163 @@ public class Main {
         }
         System.out.println("Tổng: $" + currentOrder.getTotalPrice());
     }
-    
+
+    private void addNewIngredient(Scanner scanner) {
+        System.out.print("Nhập tên nguyên liệu mới: ");
+        String ingredientName = scanner.nextLine();
+        if (!ingredientName.trim().isEmpty()) {
+            Ingredient newIngredient = new Ingredient(ingredientName);
+            ingredients.add(newIngredient);
+            System.out.println("Đã thêm nguyên liệu mới: " + newIngredient.toString());
+        } else {
+            System.out.println("Tên nguyên liệu không được để trống!");
+        }
+    }
+
+    private void addNewSupplier(Scanner scanner) {
+        System.out.print("Nhập tên nhà cung cấp mới: ");
+        String supplierName = scanner.nextLine();
+        if (!supplierName.trim().isEmpty()) {
+            Supplier newSupplier = new Supplier(supplierName);
+            suppliers.add(newSupplier);
+            System.out.println("Đã thêm nhà cung cấp mới: " + newSupplier.toString());
+        } else {
+            System.out.println("Tên nhà cung cấp không được để trống!");
+        }
+    }
+
+    private void editSupplier(Scanner scanner) {
+        if (suppliers.isEmpty()) {
+            System.out.println("Không có nhà cung cấp để sửa!");
+            return;
+        }
+        System.out.println("\nDanh sách nhà cung cấp:");
+        for (int i = 0; i < suppliers.size(); i++) {
+            System.out.println((i + 1) + ". " + suppliers.get(i).toString());
+        }
+        System.out.print("Chọn số nhà cung cấp để sửa (hoặc 0 để quay lại): ");
+        int supplierChoice = getValidIntInput(scanner, 0, suppliers.size());
+
+        if (supplierChoice > 0 && supplierChoice <= suppliers.size()) {
+            Supplier supplier = suppliers.get(supplierChoice - 1);
+            System.out.print("Nhập tên mới cho nhà cung cấp: ");
+            String newName = scanner.nextLine();
+            if (!newName.trim().isEmpty()) {
+                supplier = new Supplier(newName); // Tạo lại nhà cung cấp với tên mới
+                suppliers.set(supplierChoice - 1, supplier);
+                System.out.println("Đã cập nhật nhà cung cấp: " + supplier.toString());
+            } else {
+                System.out.println("Tên mới không được để trống!");
+            }
+        } else if (supplierChoice != 0) {
+            System.out.println("Lựa chọn không hợp lệ!");
+        }
+    }
+
+    private void deleteSupplier(Scanner scanner) {
+        if (suppliers.isEmpty()) {
+            System.out.println("Không có nhà cung cấp để xóa!");
+            return;
+        }
+        System.out.println("\nDanh sách nhà cung cấp:");
+        for (int i = 0; i < suppliers.size(); i++) {
+            System.out.println((i + 1) + ". " + suppliers.get(i).toString());
+        }
+        System.out.print("Chọn số nhà cung cấp để xóa (hoặc 0 để quay lại): ");
+        int supplierChoice = getValidIntInput(scanner, 0, suppliers.size());
+
+        if (supplierChoice > 0 && supplierChoice <= suppliers.size()) {
+            Supplier supplier = suppliers.remove(supplierChoice - 1);
+            System.out.println("Đã xóa nhà cung cấp: " + supplier.toString());
+        } else if (supplierChoice != 0) {
+            System.out.println("Lựa chọn không hợp lệ!");
+        }
+    }
+
+    private void editDish(Scanner scanner) {
+        if (menu.isEmpty()) {
+            System.out.println("Không có món nào để sửa!");
+            return;
+        }
+        System.out.println("\nDanh sách món:");
+        for (int i = 0; i < menu.size(); i++) {
+            System.out.println((i + 1) + ". " + menu.get(i).toString());
+        }
+        System.out.print("Chọn số món để sửa (hoặc 0 để quay lại): ");
+        int dishChoice = getValidIntInput(scanner, 0, menu.size());
+
+        if (dishChoice > 0 && dishChoice <= menu.size()) {
+            Dish dish = menu.get(dishChoice - 1);
+            System.out.print("Nhập tên mới: ");
+            String newName = scanner.nextLine();
+            System.out.print("Nhập giá mới: ");
+            double newPrice = getValidDoubleInput(scanner);
+            System.out.print("Nhập mô tả mới: ");
+            String newDescription = scanner.nextLine();
+            System.out.println("Chọn loại mới:");
+            System.out.println("1. Món chính");
+            System.out.println("2. Món tráng miệng");
+            System.out.print("Chọn số: ");
+            int typeChoice = getValidIntInput(scanner, 1, 2);
+            System.out.println("Chọn nguyên liệu:");
+            for (int i = 0; i < ingredients.size(); i++) {
+                System.out.println((i + 1) + ". " + ingredients.get(i).toString());
+            }
+            System.out.print("Chọn số nguyên liệu (hoặc 0 nếu không chọn): ");
+            int ingredientChoice = getValidIntInput(scanner, 0, ingredients.size());
+
+            DishFactory factory;
+            if (typeChoice == 1) {
+                factory = new MainCourseFactory();
+            } else if (typeChoice == 2) {
+                factory = new DessertFactory();
+            } else {
+                System.out.println("Loại không hợp lệ!");
+                return;
+            }
+
+            Dish updatedDish = factory.createDish(newName.isEmpty() ? dish.getName() : newName,
+                    newPrice == 0 ? dish.getPrice() : newPrice,
+                    newDescription.isEmpty() ? dish.getDescription() : newDescription);
+            if (ingredientChoice > 0 && ingredientChoice <= ingredients.size()) {
+                updatedDish.addIngredient(ingredients.get(ingredientChoice - 1));
+            }
+            menu.set(dishChoice - 1, updatedDish);
+            System.out.println("Đã cập nhật món: " + updatedDish.toString());
+        } else if (dishChoice != 0) {
+            System.out.println("Lựa chọn không hợp lệ!");
+        }
+    }
+
+    private void deleteDish(Scanner scanner) {
+        if (menu.isEmpty()) {
+            System.out.println("Không có món nào để xóa!");
+            return;
+        }
+        System.out.println("\nDanh sách món:");
+        for (int i = 0; i < menu.size(); i++) {
+            System.out.println((i + 1) + ". " + menu.get(i).toString());
+        }
+        System.out.print("Chọn số món để xóa (hoặc 0 để quay lại): ");
+        int dishChoice = getValidIntInput(scanner, 0, menu.size());
+
+        if (dishChoice > 0 && dishChoice <= menu.size()) {
+            Dish dish = menu.remove(dishChoice - 1);
+            System.out.println("Đã xóa món: " + dish.toString());
+        } else if (dishChoice != 0) {
+            System.out.println("Lựa chọn không hợp lệ!");
+        }
+    }
+
+    private void cancelOrder(Scanner scanner) {
+        if (currentOrder.getDishes().isEmpty()) {
+            System.out.println("Đơn hàng hiện tại trống, không thể hủy!");
+            return;
+        }
+        currentOrder.getDishes().clear();
+        System.out.println("Đã hủy đơn hàng thành công!");
+    }
+
     private int getValidIntInput(Scanner scanner, int min, int max) {
         while (true) {
             if (scanner.hasNextInt()) {

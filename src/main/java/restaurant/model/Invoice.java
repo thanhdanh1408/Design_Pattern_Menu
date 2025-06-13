@@ -19,6 +19,6 @@ public class Invoice {
 
     @Override
     public String toString() {
-        return "Invoice: Total = $" + finalPrice;
+        return "Hóa đơn: Tổng cộng = $" + finalPrice;
     }
 }

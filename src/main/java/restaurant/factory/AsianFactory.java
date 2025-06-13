@@ -5,7 +5,7 @@ import main.java.restaurant.model.Dish;
 public class AsianFactory implements AbstractFactory {
     @Override
     public Dish createAsianDish() {
-        return new Dish("Pho", 10.0, "Vietnamese noodle soup");
+        return new Dish("Phở", 10.0, "Phở Việt Nam");
     }
 
     @Override

@@ -12,6 +12,6 @@ public class OrderObserver implements Observer {
 
     @Override
     public void update() {
-        System.out.println("Order updated. Total orders: " + orderManager.getOrders().size());
+        System.out.println("Đã cập nhật đơn hàng. Tổng số đơn hàng: " + orderManager.getOrders().size());
     }
 }

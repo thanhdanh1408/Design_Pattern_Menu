@@ -10,6 +10,6 @@ public class EuropeanFactory implements AbstractFactory {
 
     @Override
     public Dish createEuropeanDish() {
-        return new Dish("Spaghetti", 12.0, "Italian pasta with tomato sauce");
+        return new Dish("Spaghetti", 12.0, "Mì Ý với sốt cà chua");
     }
 }

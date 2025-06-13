@@ -5,6 +5,6 @@ import main.java.restaurant.model.Dish;
 public class DessertFactory extends DishFactory {
     @Override
     public Dish createDish(String name, double price, String description) {
-        return new Dish(name, price, "Dessert: " + description);
+        return new Dish(name, price, "Món tráng miệng: " + description);
     }
 }

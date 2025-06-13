@@ -40,7 +40,7 @@ public class Dish {
     public String toString() {
         StringBuilder sb = new StringBuilder(name + " - $" + price + " (" + description + ")");
         if (!ingredients.isEmpty()) {
-            sb.append(", Ingredients: ");
+            sb.append(", Thành phần: ");
             for (Ingredient ingredient : ingredients) {
                 sb.append(ingredient.toString()).append(", ");
             }

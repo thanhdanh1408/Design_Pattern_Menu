@@ -19,6 +19,6 @@ public class AddOnDecorator extends DishDecorator {
 
     @Override
     public String getDescription() {
-        return super.getDescription() + ", with " + addOn;
+        return super.getDescription() + ", với " + addOn;
     }
 }
